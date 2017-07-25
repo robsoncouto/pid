@@ -57,6 +57,17 @@ void Init(void)
 	TCCR0B = (1 << CS00); // clock source to be used by the Timer/Counter clkI/O
 	TIMSK0 = (1 << TOIE0);
 	TCNT0  = 0;
+
+	ADMUX = (1<<REFS0)|(1<<MUX1)|(1<<MUX0);//PIN ADC7 used
+	ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS0);
+}
+
+uint16_t get_adc(uint8_t channel){
+  ADMUX&=0xF0;
+  ADMUX|=channel;
+  ADCSRA |= (1<<ADSC);
+  while(ADCSRA & (1<<ADSC));
+  return (ADC);
 }
 
 /*! \brief Read reference value.
@@ -75,7 +86,7 @@ int16_t Get_Reference(void)
  */
 int16_t Get_Measurement(void)
 {
-	return 4;
+	return get_adc(0);
 }
 
 /*! \brief Set control input to system
@@ -90,7 +101,7 @@ void Set_Input(int16_t inputValue)
 
 /*! \brief Demo of PID controller
  */
-void main(void)
+int main(void)
 {
 	int16_t referenceValue, measurementValue, inputValue;
 	//system_init();
