@@ -58,8 +58,7 @@ void Init(void)
 	TIMSK0 = (1 << TOIE0);
 	TCNT0  = 0;
 
-	ADMUX = (1<<REFS0)|(1<<MUX1)|(1<<MUX0);//PIN ADC7 used
-	ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS0);
+
 }
 
 uint16_t get_adc(uint8_t channel){
@@ -109,7 +108,9 @@ void pwm_test(uint8_t value){
 /*! \brief Demo of PID controller
  */
 int main(void){
-pwm_test(0);
+	pwm_test(0);
+	ADMUX = (1<<REFS0)|(1<<MUX1)|(1<<MUX0);//PIN ADC7 used
+	ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS0);
 	while(1){
 		for(long int i=0;i<0xFFF0;i++);
 		OCR1A=Get_Measurement();
