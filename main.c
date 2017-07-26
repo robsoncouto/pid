@@ -109,8 +109,11 @@ void pwm_test(uint8_t value){
 /*! \brief Demo of PID controller
  */
 int main(void){
-	pwm_test(200);
-	while(1);
+pwm_test(0);
+	while(1){
+		for(long int i=0;i<0xFFF0;i++);
+		OCR1A=Get_Measurement();
+	}
 	// int16_t referenceValue, measurementValue, inputValue;
 	// //system_init();
 	// // Configure Power reduction register to enable the Timer0 module
