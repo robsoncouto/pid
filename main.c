@@ -70,6 +70,7 @@ void Init(void)
 	ADMUX = (1<<REFS0)|(1<<MUX1)|(1<<MUX0);//PIN ADC7 used
 	ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS0);
 
+	DDRB=(1<<PB2)|(1<<PB3);
 	uart_init(UART_BAUD_SELECT(UART_BAUD_RATE,F_CPU));
 }
 
@@ -88,7 +89,7 @@ uint16_t get_adc(uint8_t channel){
  */
 int16_t Get_Reference(void)
 {
-	return 8;
+	return 512;
 }
 
 /*! \brief Read system process value
@@ -107,7 +108,16 @@ int16_t Get_Measurement(void)
  */
 void Set_Input(int16_t inputValue)
 {
-	OCR1A=inputValue;
+
+	if(inputValue>0){
+		OCR1A=inputValue;
+		PORTB|=(1<<PB2);
+		PORTB&=~(1<<PB3);
+	}else{
+		OCR1A=-inputValue;
+		PORTB|=(1<<PB3);
+		PORTB&=~(1<<PB2);
+	}
 }
 void pwm_test(uint8_t value){
 	DDRB=(1<<PB1);
@@ -128,13 +138,13 @@ int main(void){
 	// Atmel START code by default configures PRR to reduce the power consumption.
 	//PRR &= ~(1 << PRTIM0);
 	Init();
-	DDRD=(1<<1)|(0<<0);
+	pwm_test(0);
+	//DDRD=(1<<1)|(0<<0);
 	sei();
-
 	while (1) {
 		printf("\nAnalog read: %d\n",Get_Measurement());
-		_delay_ms(1000);
-	}
+
+
 		// Run PID calculations once every PID timer timeout
 		if (gFlags.pidTimer == 1) {
 			uart_puts("\nPID test\n");
@@ -147,8 +157,10 @@ int main(void){
 			Set_Input(inputValue);
 
 			gFlags.pidTimer = FALSE;
-		}
 
+			printf("\nOutput: %d\n",inputValue);
+		}
+	}
 }
 
 /*! \mainpage
