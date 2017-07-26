@@ -98,45 +98,39 @@ void Set_Input(int16_t inputValue)
 {
 	;
 }
-void pwm_test(){
-	DDRD   |= (1 << 5);
-	// Set on match, clear on TOP
-	TCCR1A  = ((1 << COM1A1) | (1 << COM1A0));
-	// Phase + Frequency Correct PWM, Fcpu speed
-	TCCR1B  = ((1 << CS10) | (1 << WGM13));
-	OCR1A=0x0a;
+void pwm_test(uint8_t value){
+	DDRB=(1<<PB1);
+	TCCR1A=(1<<COM1A1)|(1<<WGM10);
+	TCCR1B=(1<<WGM12)|(CS11<<1);
+	OCR1A=value;
 }
 
 
 /*! \brief Demo of PID controller
  */
-int main(void)
-{
-	int16_t referenceValue, measurementValue, inputValue;
-	//system_init();
-	// Configure Power reduction register to enable the Timer0 module
-	// Atmel START code by default configures PRR to reduce the power consumption.
-	PRR &= ~(1 << PRTIM0);
-	Init();
-	sei();
-
-
-
-
-
-	while (1) {
-		// Run PID calculations once every PID timer timeout
-		if (gFlags.pidTimer == 1) {
-			referenceValue   = Get_Reference();
-			measurementValue = Get_Measurement();
-
-			inputValue = pid_Controller(referenceValue, measurementValue, &pidData);
-
-			Set_Input(inputValue);
-
-			gFlags.pidTimer = FALSE;
-		}
-	}
+int main(void){
+	pwm_test(200);
+	while(1);
+	// int16_t referenceValue, measurementValue, inputValue;
+	// //system_init();
+	// // Configure Power reduction register to enable the Timer0 module
+	// // Atmel START code by default configures PRR to reduce the power consumption.
+	// PRR &= ~(1 << PRTIM0);
+	// Init();
+	// sei();
+	// while (1) {
+	// 	// Run PID calculations once every PID timer timeout
+	// 	if (gFlags.pidTimer == 1) {
+	// 		referenceValue   = Get_Reference();
+	// 		measurementValue = Get_Measurement();
+	//
+	// 		inputValue = pid_Controller(referenceValue, measurementValue, &pidData);
+	//
+	// 		Set_Input(inputValue);
+	//
+	// 		gFlags.pidTimer = FALSE;
+	// 	}
+	// }
 }
 
 /*! \mainpage
