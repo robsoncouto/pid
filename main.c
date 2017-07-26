@@ -8,6 +8,8 @@
 #include "pid.h"
 #include "serial/uart.h"
 #include <util/delay.h>
+#include <stdio.h>
+
 
 
 /*! \brief P, I and D parameter values
@@ -118,23 +120,25 @@ void pwm_test(uint8_t value){
 /*! \brief Demo of PID controller
  */
 int main(void){
-
+	static FILE mystdout = FDEV_SETUP_STREAM(uart0_putc, NULL,_FDEV_SETUP_WRITE);
+	stdout = &mystdout;
 	int16_t referenceValue, measurementValue, inputValue;
 	//system_init();
 	// Configure Power reduction register to enable the Timer0 module
 	// Atmel START code by default configures PRR to reduce the power consumption.
 	//PRR &= ~(1 << PRTIM0);
-	//Init();
-	uart_init(UART_BAUD_SELECT(9600,16000000));
+	Init();
 	DDRD=(1<<1)|(0<<0);
 	sei();
+
 	while (1) {
-		uart_puts("\nPID test\n");
+		printf("\nAnalog read: %d\n",Get_Measurement());
 		_delay_ms(1000);
 	}
 		// Run PID calculations once every PID timer timeout
 		if (gFlags.pidTimer == 1) {
 			uart_puts("\nPID test\n");
+
 			referenceValue   = Get_Reference();
 			measurementValue = Get_Measurement();
 
