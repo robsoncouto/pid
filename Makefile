@@ -5,7 +5,7 @@
 # (GNU make, BSD make, SysV make)
 
 
-MCU = atmega328
+MCU = atmega328p
 FORMAT = ihex
 TARGET = main
 SRC = $(TARGET).c pid.c
