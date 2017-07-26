@@ -8,7 +8,7 @@
 MCU = atmega328p
 FORMAT = ihex
 TARGET = main
-SRC = $(TARGET).c pid.c
+SRC = $(TARGET).c pid.c serial/uart.c
 ASRC =
 OPT = s
 
@@ -143,8 +143,10 @@ sym: $(TARGET).sym
 # Program the device.
 program: $(TARGET).hex $(TARGET).eep
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM)
-
-
+arduino: $(TARGET).hex $(TARGET).eep
+	$(AVRDUDE) -v -p atmega328p -c arduino -P /dev/ttyUSB0 -b 57600 -D $(AVRDUDE_WRITE_FLASH)
+# avrdude -v -p atmega328p -c arduino -P /dev/ttyUSB0 -b 57600 -D -U flash:w:blink.hex:i
+# thanks to https://typeunsafe.wordpress.com/2011/07/22/programming-arduino-with-avrdude/
 
 
 # Convert ELF to COFF for use in debugging / simulating in AVR Studio or VMLAB.
