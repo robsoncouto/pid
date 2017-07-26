@@ -98,6 +98,15 @@ void Set_Input(int16_t inputValue)
 {
 	;
 }
+void pwm_test(){
+	DDRD   |= (1 << 5);
+	// Set on match, clear on TOP
+	TCCR1A  = ((1 << COM1A1) | (1 << COM1A0));
+	// Phase + Frequency Correct PWM, Fcpu speed
+	TCCR1B  = ((1 << CS10) | (1 << WGM13));
+	OCR1A=0x0a;
+}
+
 
 /*! \brief Demo of PID controller
  */
@@ -110,6 +119,10 @@ int main(void)
 	PRR &= ~(1 << PRTIM0);
 	Init();
 	sei();
+
+
+
+
 
 	while (1) {
 		// Run PID calculations once every PID timer timeout
