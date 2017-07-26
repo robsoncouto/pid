@@ -1,7 +1,14 @@
+#define F_CPU 16000000UL
+#define UART_BAUD_RATE 38400
+
+
 #include <avr/io.h>
 #include <stdint.h>
 #include <avr/interrupt.h>
 #include "pid.h"
+#include "serial/uart.h"
+#include <util/delay.h>
+
 
 /*! \brief P, I and D parameter values
  *
@@ -58,7 +65,10 @@ void Init(void)
 	TIMSK0 = (1 << TOIE0);
 	TCNT0  = 0;
 
+	ADMUX = (1<<REFS0)|(1<<MUX1)|(1<<MUX0);//PIN ADC7 used
+	ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS0);
 
+	uart_init(UART_BAUD_SELECT(UART_BAUD_RATE,F_CPU));
 }
 
 uint16_t get_adc(uint8_t channel){
@@ -95,7 +105,7 @@ int16_t Get_Measurement(void)
  */
 void Set_Input(int16_t inputValue)
 {
-	;
+	OCR1A=inputValue;
 }
 void pwm_test(uint8_t value){
 	DDRB=(1<<PB1);
@@ -108,33 +118,33 @@ void pwm_test(uint8_t value){
 /*! \brief Demo of PID controller
  */
 int main(void){
-	pwm_test(0);
-	ADMUX = (1<<REFS0)|(1<<MUX1)|(1<<MUX0);//PIN ADC7 used
-	ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS0);
-	while(1){
-		for(long int i=0;i<0xFFF0;i++);
-		OCR1A=Get_Measurement();
+
+	int16_t referenceValue, measurementValue, inputValue;
+	//system_init();
+	// Configure Power reduction register to enable the Timer0 module
+	// Atmel START code by default configures PRR to reduce the power consumption.
+	//PRR &= ~(1 << PRTIM0);
+	//Init();
+	uart_init(UART_BAUD_SELECT(9600,16000000));
+	DDRD=(1<<1)|(0<<0);
+	sei();
+	while (1) {
+		uart_puts("\nPID test\n");
+		_delay_ms(1000);
 	}
-	// int16_t referenceValue, measurementValue, inputValue;
-	// //system_init();
-	// // Configure Power reduction register to enable the Timer0 module
-	// // Atmel START code by default configures PRR to reduce the power consumption.
-	// PRR &= ~(1 << PRTIM0);
-	// Init();
-	// sei();
-	// while (1) {
-	// 	// Run PID calculations once every PID timer timeout
-	// 	if (gFlags.pidTimer == 1) {
-	// 		referenceValue   = Get_Reference();
-	// 		measurementValue = Get_Measurement();
-	//
-	// 		inputValue = pid_Controller(referenceValue, measurementValue, &pidData);
-	//
-	// 		Set_Input(inputValue);
-	//
-	// 		gFlags.pidTimer = FALSE;
-	// 	}
-	// }
+		// Run PID calculations once every PID timer timeout
+		if (gFlags.pidTimer == 1) {
+			uart_puts("\nPID test\n");
+			referenceValue   = Get_Reference();
+			measurementValue = Get_Measurement();
+
+			inputValue = pid_Controller(referenceValue, measurementValue, &pidData);
+
+			Set_Input(inputValue);
+
+			gFlags.pidTimer = FALSE;
+		}
+
 }
 
 /*! \mainpage
